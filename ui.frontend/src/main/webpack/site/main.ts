@@ -1,3 +1,5 @@
+import './main.scss';
+
 import RequireContext = __WebpackModuleApi.RequireContext;
 
 export interface Type<T> extends Function {
