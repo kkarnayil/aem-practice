@@ -1,0 +1,9 @@
+<sly data-sly-use.clientlib="core/wcm/components/commons/v1/templates/clientlib.html">
+  <sly data-sly-call="${clientlib.all @ categories='officecomponentclientlibrary'}" />
+</sly>
+<div class="country" data-sly-use.model="com.aempactice.core.models.OfficeComponent">
+  <label for="fruits">Choose a fruit:</label>
+    <select id="fruits" name="fruits" data-sly-list="${model.countryList}">
+        <option value="${item.countryName}">${item.countryName}</option>
+    </select>
+</div>

@@ -1,0 +1,29 @@
+<!--/** <div>${properties.isEnabled}</div>
+    <div>${resource.path}</div>
+    <div>${pageProperties["jcr:title"]}</div>
+    <div>${currentPage.title}</div> 
+
+    <p data-sly-test.hasChild="${currentPage.listChildren}" data-sly-repeat="${currentPage.listChildren}">
+        <a href="${item.path}.html">${item.title}</a>
+    </p>
+    **/-->
+<div
+  class="new-component"
+  data-sly-use.template="core/wcm/components/commons/v1/templates.html"
+>
+  <h1 class="title">${properties.title}</h1>
+  <div class="image">
+    <img src="${properties.fileReference}" />
+  </div>
+  <div class="description">${properties.description @context='html'}</div>
+  <div class="author-info">
+    <p class="author right">${properties.author}</p>
+    <p class="date right">
+      ${'EEEE, d MMM y' @ format=properties.date, timezone='UTC',
+      locale='en_US', i18n}
+    </p>
+  </div>
+</div>
+<sly
+  data-sly-call="${template.placeholder @ isEmpty=!properties.title}"
+></sly>
