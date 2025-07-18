@@ -23,9 +23,13 @@ module.exports = {
     },
     output: {
         filename: (chunkData) => {
-            return chunkData.chunk.name === 'dependencies' ? 'clientlib-dependencies/[name].js' : 'clientlib-site/[name].js';
+            let chunkName = chunkData.chunk.name
+            return `clientlib-${chunkName}/[name].js`
         },
-        path: path.resolve(__dirname, 'dist')
+        path: path.resolve(__dirname, './dist'),
+        chunkFilename: 'clientlib-dynamic-modules/resources/[name]-[contenthash].js',
+        publicPath: "/etc.clientlibs/aempractice/clientlibs/",
+        clean: true
     },
     module: {
         rules: [

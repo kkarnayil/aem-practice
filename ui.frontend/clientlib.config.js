@@ -88,6 +88,17 @@ module.exports = {
           ignore: ['**/*.js', '**/*.css']
         }
       }
-    }
+    },
+    {
+      ...libsBaseConfig,
+      name: 'clientlib-dynamic-modules',
+      categories: ['mysite.site.dynamic-modules'],
+      dependencies: [],
+      assets: {
+        resources: [
+          "clientlib-dynamic-modules/resources/*.js"
+        ]
+      },
+    },
   ]
 };
