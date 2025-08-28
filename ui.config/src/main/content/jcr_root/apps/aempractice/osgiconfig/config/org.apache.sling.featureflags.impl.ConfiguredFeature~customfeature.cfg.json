@@ -1,0 +1,5 @@
+{
+  "enabled":"$[env:FEATURE_FLAG_CUSTOM_FEATURE;default=true]",
+  "name":"customFeature",
+  "description":"Custom Feature Flag for Test"
+}

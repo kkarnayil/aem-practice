@@ -17,4 +17,8 @@
     <sly data-sly-call="${clientlib.css @ categories='aempractice.base'}"/>
 </sly>
 
+<sly data-sly-use.customComponent="com.aempactice.core.models.CustomPageComponent" data-sly-test="${customComponent.customFeatureEnabled}">
+    ${model.customFeature @ context = 'unsafe'}
+</sly>
+
 <sly data-sly-resource="${'contexthub' @ resourceType='granite/contexthub/components/contexthub'}"/>
