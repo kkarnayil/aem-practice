@@ -18,7 +18,13 @@
 </sly>
 
 <sly data-sly-use.customComponent="com.aempactice.core.models.CustomPageComponent" data-sly-test="${customComponent.customFeatureEnabled}">
-    ${model.customFeature @ context = 'unsafe'}
+    ${customComponent.customFeature @ context = 'unsafe'}
+</sly>
+
+<sly data-sly-use.customComponent="com.aempactice.core.models.CustomPageComponent" data-sly-test="${customComponent.jsonSchema}">
+    <script type="application/ld+json">
+			 ${customComponent.jsonSchema @ context='unsafe'}
+	</script>
 </sly>
 
 <sly data-sly-resource="${'contexthub' @ resourceType='granite/contexthub/components/contexthub'}"/>
