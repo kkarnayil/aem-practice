@@ -2,45 +2,56 @@ package com.aempactice.core.schema;
 
 import com.adobe.cq.wcm.core.components.models.Breadcrumb;
 import com.adobe.cq.wcm.core.components.models.NavigationItem;
+import com.day.cq.commons.Externalizer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.apache.sling.api.SlingHttpServletRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
+@NoArgsConstructor
 public class BreadCrumbSchemaGenerator {
 
     @JsonIgnore
     private Breadcrumb breadcrumb;
 
+    @JsonIgnore
+    private Externalizer externalizer;
+
+    @JsonIgnore
+    private SlingHttpServletRequest request;
+
+    @Getter
     @JsonProperty("@context")
-    private final String context = "https://schema.org";
+    private String context = "https://schema.org";
 
+    @Getter
     @JsonProperty("@type")
-    private final String type = "BreadcrumbList";
+    private String type = "BreadcrumbList";
 
+    @Getter
     @JsonProperty("itemListElement")
     final List<ListItem> itemListElements = new ArrayList<>();
 
+    public BreadCrumbSchemaGenerator(Breadcrumb breadcrumb, Externalizer externalizer, SlingHttpServletRequest request) {
+        this.breadcrumb = breadcrumb;
+        this.externalizer = externalizer;
+        this.request = request;
+    }
+
     @JsonIgnore
-    public String getSchema() {
+    public BreadCrumbSchemaGenerator getSchema() {
         if (breadcrumb != null && breadcrumb.getItems() != null && !breadcrumb.getItems().isEmpty()) {
             int position = 1;
             for (NavigationItem item : breadcrumb.getItems()) {
-
-                itemListElements.add(new ListItem(position, item.getTitle(), item.getLink() != null && !item.isCurrent() ? item.getLink().getURL() : null));
+                String link = item.getLink() != null ? externalizer.publishLink(request.getResourceResolver(), item.getLink().getURL())  : null;
+                itemListElements.add(new ListItem(position, item.getTitle(), link));
                 position++;
             }
-            try {
-                return new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL).writerWithDefaultPrettyPrinter().writeValueAsString(this);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         }
-        return "";
+        return this;
     }
 }

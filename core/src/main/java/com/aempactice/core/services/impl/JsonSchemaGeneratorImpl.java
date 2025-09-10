@@ -3,8 +3,8 @@ package com.aempactice.core.services.impl;
 import com.adobe.cq.wcm.core.components.models.Breadcrumb;
 import com.aempactice.core.schema.BreadCrumbSchemaGenerator;
 import com.aempactice.core.services.JsonSchemaGenerator;
+import com.day.cq.commons.Externalizer;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +24,10 @@ public class JsonSchemaGeneratorImpl implements JsonSchemaGenerator {
     @Reference
     private ModelFactory modelFactory;
 
-    SlingHttpServletRequest request;
+    @Reference
+    private Externalizer externalizer;
+
+    private SlingHttpServletRequest request;
 
     class CollectionData {
         List<Breadcrumb> breadcrumbs = new ArrayList<>();
@@ -36,7 +39,7 @@ public class JsonSchemaGeneratorImpl implements JsonSchemaGenerator {
         CollectionData collectionData = new CollectionData();
         this.request = request;
         collectionData = collectComponentData(collectionData, resource);
-        log.info("Data Collected {}", collectionData.breadcrumbs.get(0).getItems().size());
+        //log.info("Data Collected {}", collectionData.breadcrumbs.get(0).getItems().size());
         return generateJsonSchema(collectionData);
     }
 
@@ -61,7 +64,7 @@ public class JsonSchemaGeneratorImpl implements JsonSchemaGenerator {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+           log.error(e.getMessage());
         }
         return collectionData;
     }
@@ -75,16 +78,14 @@ public class JsonSchemaGeneratorImpl implements JsonSchemaGenerator {
                 return "{}";
             } else {
                 for (Breadcrumb breadcrumb : collectionData.breadcrumbs) {
-                    JsonNode node = null;
-                    node = mapper.readTree(new BreadCrumbSchemaGenerator(breadcrumb).getSchema());
-                    arrayNode.add(node);
+                    arrayNode.add(mapper.valueToTree(new BreadCrumbSchemaGenerator(breadcrumb, externalizer, request).getSchema()));
                 }
             }
             String jsonString = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(arrayNode);
             log.info("Generated JSON Schema: {}", jsonString);
             return jsonString;
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
             return null;
         }
     }
