@@ -15,6 +15,7 @@
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/-->
 <div data-sly-use.teaser="com.adobe.cq.wcm.core.components.models.Teaser"
      data-sly-use.templates="core/wcm/components/commons/v1/templates.html"
+     data-sly-use.teaserHelper="com.aempactice.core.models.TeaserHandlerImpl"
      data-sly-use.imageTemplate="image.html"
      data-sly-use.pretitleTemplate="pretitle.html"
      data-sly-use.titleTemplate="title.html"
@@ -34,7 +35,13 @@
             <sly data-sly-call="${descriptionTemplate.description @ teaser=teaser}"></sly>
             <sly data-sly-call="${actionsTemplate.actions @ teaser=teaser}"></sly>
         </div>
-        <sly data-sly-call="${imageTemplate.image @ teaser=teaser}"></sly>
+        <sly data-sly-test="${!teaserHelper.imageVariationSelected}" data-sly-call="${imageTemplate.image @ teaser=teaser}"></sly>
     </a>
+    <div class="custom-container" data-sly-test="${teaserHelper.containerClassSelected}">
+        <sly data-sly-resource="${'./teaser-container' @ resourceType='aempractice/components/container'}"></sly>
+    </div>
+    <div class="custom-image" data-sly-test="${teaserHelper.imageVariationSelected}">
+        <sly data-sly-call="${imageTemplate.image @ teaser=teaser}"></sly>
+    </div>
 </div>
 <sly data-sly-call="${templates.placeholder @ isEmpty=!hasContent, classAppend='cmp-teaser'}"></sly>
