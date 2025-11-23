@@ -107,22 +107,19 @@ public class ExtendedListImpl implements List {
         ValueMap vm = linkResource.getValueMap();
         String linkValue = vm.get(PN_LINK_URL, String.class);
         String textValue = vm.get("linkText", String.class);
-        if(linkValue == null){
+        if(StringUtils.isEmpty(linkValue)){
             return null;
         }
 
         if (isExternalLink(linkValue)) {
-            Link link = linkManager.get(linkValue).build();
-            if(link.isValid()) {
                 return new StaticListItemImpl(textValue, linkValue);
-            }
         } else {
             Resource resource = resourceResolver.getResource(linkValue);
             if (null != resource) {
                 if (resource.adaptTo(Page.class) != null) {
                     Page page = resource.adaptTo(Page.class);
                     Link link = linkManager.get(page).build();
-                    textValue = textValue == null ? getPageTitle(page) : textValue;
+                    textValue = StringUtils.isEmpty(textValue) ? getPageTitle(page) : textValue;
                     linkValue = link.getURL();
                     return new StaticListItemImpl(textValue, linkValue);
                 }

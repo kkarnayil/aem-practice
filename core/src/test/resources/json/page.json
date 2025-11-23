@@ -1,0 +1,75 @@
+{
+  "override": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "sling:resourceType": "aempractice/components/page"
+    }
+  },
+  "navtitle": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "jcr:title": "Home",
+      "navTitle": "Navigation Title",
+      "sling:resourceType": "aempractice/components/page"
+    }
+  },
+  "pagetitle": {
+    "jcr:primaryType": "cq:Page",
+    "jcr:content": {
+      "jcr:primaryType": "cq:PageContent",
+      "jcr:title": "Page Title",
+      "sling:resourceType": "aempractice/components/page"
+    }
+  },
+  "not-page-resource": {
+    "jcr:primaryType": "nt:unstructured"
+  },
+  "test-page": {
+    "jcr:primaryType": "cq:Page",
+    "sling:resourceType": "aempractice/components/page",
+    "jcr:content": {
+      "jcr:title": "Test Page",
+      "jcr:primaryType": "cq:PageContent",
+      "list": {
+        "listFrom": "customstatic",
+        "sling:resourceType": "aempractice/components/list",
+        "customstatic": {
+          "item0": {
+            "linkURL": "https://www.externalsite.com",
+            "linkText": "External Site"
+          },
+          "item1": {
+            "linkURL": "/content/override",
+            "linkText": "Override"
+          },
+          "item2": {
+            "linkURL": "/content/pagetitle",
+            "linkText": ""
+          },
+          "item3": {
+            "linkURL": "/content/navtitle",
+            "linkText": ""
+          },
+          "item4": {
+            "linkURL": "/content/invalid",
+            "linkText": "Invalid URL"
+          },
+          "item5": {
+            "linkURL": "",
+            "linkText": "No URL"
+          },
+          "item6": {
+            "linkURL": "/content/not-page-resource",
+            "linkText": "Not Page"
+          }
+        }
+      },
+      "emptyList": {
+        "listFrom": "customstatic",
+        "sling:resourceType": "aempractice/components/list"
+      }
+    }
+  }
+}
