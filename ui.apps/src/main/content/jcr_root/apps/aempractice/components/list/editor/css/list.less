@@ -1,0 +1,20 @@
+@cmp-list__editor-static-link-spacing: 10px;
+
+.cmp-list__editor-static-link {
+    display: flex;
+}
+
+.cmp-list__editor-static-link .cmp-list__editor-static-multifield-linkURL.coral-Form-field {
+    margin-left: 0;
+    width: 60%;
+}
+
+.cmp-list__editor-static-link .cmp-list__editor-static-multifield-linkTarget.coral-Form-field, .cmp-list__editor-static-link .cmp-list__editor-static-multifield-linkText.coral-Form-field {
+    width: 20%;
+    margin-left: @cmp-list__editor-static-link-spacing;
+}
+
+
+.cmp-list__editor-static-link coral-tooltip {
+    min-width: 100px;
+}
