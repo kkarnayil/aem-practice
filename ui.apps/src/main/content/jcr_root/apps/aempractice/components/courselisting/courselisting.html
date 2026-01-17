@@ -1,0 +1,16 @@
+<div class="course-listing" 
+    data-sly-use.model="com.aempactice.core.models.CourseListingModel" 
+    data-sly-use.placeholderTemplate="core/wcm/components/commons/v1/templates.html"
+    data-sly-set.isEmpty="${!model.courseFolderPath || model.courses.size == 0}">
+  
+    <div class="course-grid" data-sly-test="${!isEmpty}" data-sly-list.course="${model.courses}">
+        <a class="course-card" data-course-id="${course.id}" href="${course.path @ selectors=course.id, extension='html'}">
+            <img src="${course.thumbnail}" alt="" class="course-icon" />
+            <div class="course-content">
+                <h3>${course.title}</h3>
+                <span class="course-link">${model.viewCourseLinkLabel}</span>
+            </div>
+        </a>
+    </div>
+</div>
+<sly data-sly-call="${placeholderTemplate.placeholder @ isEmpty=isEmpty}"></sly>

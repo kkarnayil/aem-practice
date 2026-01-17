@@ -1,4 +1,5 @@
 import './main.scss';
+import '../components/courselisting.js';
 
 import RequireContext = __WebpackModuleApi.RequireContext;
 
