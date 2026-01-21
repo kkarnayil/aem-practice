@@ -2,6 +2,9 @@ package com.aempactice.core.models;
 
 import com.adobe.cq.dam.cfm.ContentFragment;
 import com.aempactice.core.beans.Course;
+import com.day.cq.wcm.api.Page;
+import com.day.cq.wcm.msm.api.LiveRelationship;
+import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -11,10 +14,13 @@ import org.apache.sling.api.resource.ResourceResolver;
 import org.apache.sling.models.annotations.Default;
 import org.apache.sling.models.annotations.DefaultInjectionStrategy;
 import org.apache.sling.models.annotations.Model;
+import org.apache.sling.models.annotations.injectorspecific.OSGiService;
+import org.apache.sling.models.annotations.injectorspecific.ScriptVariable;
 import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 import javax.annotation.PostConstruct;
+import javax.jcr.RangeIterator;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -43,6 +49,12 @@ public class CourseListingModel {
     @Default(values = "View Course")
     @ValueMapValue
     private String viewCourseLinkLabel;
+
+    @OSGiService
+    private LiveRelationshipManager liveRelationshipManager;
+
+    @ScriptVariable
+    private Page currentPage;
 
     @Getter
     private List<Course> courses;
@@ -90,7 +102,7 @@ public class CourseListingModel {
         Course course = Course.builder()
                 .id(getFragmentValue(fragment, "courseId"))
                 .title(getFragmentValue(fragment, "courseTitle"))
-                .path(getFragmentValue(fragment, "courseLink"))
+                .path(getMsmLink(getFragmentValue(fragment, "courseLink")))
                 .thumbnail(getFragmentValue(fragment, "courseThumbnail"))
                 .build();
 
@@ -100,6 +112,34 @@ public class CourseListingModel {
         }
 
         return Optional.of(course);
+    }
+
+    private String getMsmLink(String courseLink) {
+        String courseMsmLink = null;
+
+        if (StringUtils.isBlank(courseLink)) {
+            return null;
+        }
+
+        if (currentPage.getPath().contains("language-masters")) {
+            return courseLink;
+        }
+
+        Resource resource = resourceResolver.getResource(courseLink);
+        if (resource == null) {
+            return null;
+        }
+
+        try {
+            RangeIterator iterator = liveRelationshipManager.getLiveRelationships(resource, currentPage.getPath(), null);
+            if (iterator.hasNext()) {
+                LiveRelationship relationship = (LiveRelationship) iterator.next();
+                courseMsmLink = relationship.getTargetPath();
+            }
+        } catch (Exception e) {
+            log.error("Error while getting MSM link", e);
+        }
+        return courseMsmLink;
     }
 
     /**
