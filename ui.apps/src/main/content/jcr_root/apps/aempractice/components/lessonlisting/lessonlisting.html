@@ -1,0 +1,16 @@
+<div class="lesson-listing" 
+    data-sly-use.model="com.aempactice.core.models.LessonListingModel" 
+    data-sly-use.placeholderTemplate="core/wcm/components/commons/v1/templates.html"
+    data-sly-set.isEmpty="${!model.coursePath || model.lessons.size == 0}">
+  
+    <div class="lesson-grid" data-sly-test="${!isEmpty}" data-sly-list.lesson="${model.lessons}">
+        <a class="lesson-card" data-lesson-id="${lesson.id}" href="${lesson.path @ selectors=lesson.id, extension='html'}">
+            <img src="${lesson.thumbnail}" alt="" class="lesson-icon" />
+            <div class="lesson-content">
+                <h3>${lesson.title}</h3>
+                <span class="lesson-link">${model.viewlessonLinkLabel}</span>
+            </div>
+        </a>
+    </div>
+</div>
+<sly data-sly-call="${placeholderTemplate.placeholder @ isEmpty=isEmpty}"></sly>

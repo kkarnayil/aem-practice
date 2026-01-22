@@ -3,7 +3,6 @@ package com.aempactice.core.models;
 import com.adobe.cq.dam.cfm.ContentFragment;
 import com.aempactice.core.beans.Course;
 import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -20,13 +19,15 @@ import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 import javax.annotation.PostConstruct;
-import javax.jcr.RangeIterator;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import static com.aempactice.core.utils.CommonUtils.getFragmentValue;
+import static com.aempactice.core.utils.CommonUtils.getMsmLink;
 
 @Slf4j
 @Model(adaptables = SlingHttpServletRequest.class, resourceType = CourseListingModel.RESOURCE_TYPE, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
@@ -89,9 +90,8 @@ public class CourseListingModel {
                 .filter(Objects::nonNull)
                 .map(this::buildCourse)
                 .flatMap(Optional::stream)
-                .sorted(Comparator.comparing(Course::getTitle))
+                .sorted(Comparator.comparing(Course::getTitle, String.CASE_INSENSITIVE_ORDER))
                 .collect(Collectors.toList());
-
     }
 
     /**
@@ -99,61 +99,21 @@ public class CourseListingModel {
      */
     private Optional<Course> buildCourse(ContentFragment fragment) {
 
-        Course course = Course.builder()
-                .id(getFragmentValue(fragment, "courseId"))
-                .title(getFragmentValue(fragment, "courseTitle"))
-                .path(getMsmLink(getFragmentValue(fragment, "courseLink")))
-                .thumbnail(getFragmentValue(fragment, "courseThumbnail"))
-                .build();
+        String id = getFragmentValue(fragment, "courseId");
+        String title = getFragmentValue(fragment, "courseTitle");
+        String path = getMsmLink(getFragmentValue(fragment, "courseLink"), resourceResolver, liveRelationshipManager, currentPage);
+        String thumbnail = getFragmentValue(fragment, "courseThumbnail");
 
-        if (StringUtils.isAnyBlank(course.getId(), course.getTitle(), course.getPath())) {
+        if (StringUtils.isAnyBlank(id, path, title)) {
             log.warn("Invalid course fragment: {}", fragment.getTitle());
             return Optional.empty();
         }
 
-        return Optional.of(course);
+        return Optional.of(Course.builder()
+                .id(id)
+                .title(title)
+                .path(path)
+                .thumbnail(thumbnail)
+                .build());
     }
-
-    private String getMsmLink(String courseLink) {
-        String courseMsmLink = null;
-
-        if (StringUtils.isBlank(courseLink)) {
-            return null;
-        }
-
-        if (currentPage.getPath().contains("language-masters")) {
-            return courseLink;
-        }
-
-        Resource resource = resourceResolver.getResource(courseLink);
-        if (resource == null) {
-            return null;
-        }
-
-        try {
-            RangeIterator iterator = liveRelationshipManager.getLiveRelationships(resource, currentPage.getPath(), null);
-            if (iterator.hasNext()) {
-                LiveRelationship relationship = (LiveRelationship) iterator.next();
-                courseMsmLink = relationship.getTargetPath();
-            }
-        } catch (Exception e) {
-            log.error("Error while getting MSM link", e);
-        }
-        return courseMsmLink;
-    }
-
-    /**
-     * Safely reads Content Fragment element value
-     */
-    private String getFragmentValue(ContentFragment fragment, String elementName) {
-
-        if (fragment == null || !fragment.hasElement(elementName)) {
-            return StringUtils.EMPTY;
-        }
-
-        return Optional.ofNullable(fragment.getElement(elementName).getValue())
-                .map(v -> v.getValue(String.class))
-                .orElse(StringUtils.EMPTY);
-    }
-
 }

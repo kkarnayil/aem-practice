@@ -1,0 +1,59 @@
+.lesson-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+
+  /* Card */
+  .lesson-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    background: #f2f3f5;
+    border-radius: 18px;
+    text-decoration: none;
+    transition: background 0.25s ease, box-shadow 0.25s ease,
+      transform 0.25s ease;
+
+    /* Circular image */
+    .lesson-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    /* Text container */
+    .lesson-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #111827;
+        margin: 0;
+        line-height: 1.3;
+      }
+
+      /* Link */
+      .lesson-link {
+        font-size: 14px;
+        color: #4b5563;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+    }
+
+    &.is-visited {
+      .lesson-icon {
+        filter: grayscale(100%);
+        opacity: 0.7;
+      }
+    }
+  }
+}
