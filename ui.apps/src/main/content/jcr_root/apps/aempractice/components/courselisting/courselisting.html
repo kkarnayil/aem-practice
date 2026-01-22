@@ -4,7 +4,7 @@
     data-sly-set.isEmpty="${!model.courseFolderPath || model.courses.size == 0}">
   
     <div class="course-grid" data-sly-test="${!isEmpty}" data-sly-list.course="${model.courses}">
-        <a class="course-card" data-course-id="${course.id}" href="${course.path @ selectors=course.id, extension='html'}">
+        <a class="course-card" data-course-id="${course.id}" data-lessons-count="${course.lessonsCount}" href="${course.path @ extension='html'}">
             <img src="${course.thumbnail}" alt="" class="course-icon" />
             <div class="course-content">
                 <h3>${course.title}</h3>

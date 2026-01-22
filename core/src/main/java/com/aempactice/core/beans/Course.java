@@ -12,4 +12,5 @@ public class Course {
     private String title;
     private String path;
     private String thumbnail;
+    private int lessonsCount;
 }

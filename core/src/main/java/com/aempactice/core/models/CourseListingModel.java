@@ -97,15 +97,16 @@ public class CourseListingModel {
     /**
      * Builds Course object from Content Fragment
      */
-    private Optional<Course> buildCourse(ContentFragment fragment) {
+    private Optional<Course> buildCourse(ContentFragment courseFragment) {
 
-        String id = getFragmentValue(fragment, "courseId");
-        String title = getFragmentValue(fragment, "courseTitle");
-        String path = getMsmLink(getFragmentValue(fragment, "courseLink"), resourceResolver, liveRelationshipManager, currentPage);
-        String thumbnail = getFragmentValue(fragment, "courseThumbnail");
+        String id = getFragmentValue(courseFragment, "courseId");
+        String title = getFragmentValue(courseFragment, "courseTitle");
+        String path = getMsmLink(getFragmentValue(courseFragment, "courseLink"), resourceResolver, liveRelationshipManager, currentPage);
+        String thumbnail = getFragmentValue(courseFragment, "courseThumbnail");
+        int lessonsCount = getLessonCount(courseFragment);
 
         if (StringUtils.isAnyBlank(id, path, title)) {
-            log.warn("Invalid course fragment: {}", fragment.getTitle());
+            log.warn("Invalid course fragment: {}", courseFragment.getTitle());
             return Optional.empty();
         }
 
@@ -114,6 +115,17 @@ public class CourseListingModel {
                 .title(title)
                 .path(path)
                 .thumbnail(thumbnail)
+                .lessonsCount(lessonsCount)
                 .build());
+    }
+
+    private int getLessonCount(ContentFragment courseFragment) {
+        int lessonsCount = 0;
+        if (courseFragment.hasElement("lessons")) {
+            lessonsCount = Optional.ofNullable(courseFragment.getElement("lessons").getValue().getValue(String[].class))
+                    .map(lessonsArr -> lessonsArr.length)
+                    .orElse(0);
+        }
+        return lessonsCount;
     }
 }

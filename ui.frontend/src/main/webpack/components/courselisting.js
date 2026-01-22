@@ -2,71 +2,133 @@
   "use strict";
 
   const STORAGE_KEY = "visitedCourses";
-  let visitedCourses = [];
-  let visitedCourseSet = new Set();
 
-  function loadVisitedCourses() {
+  let store = {
+    courses: {}
+  };
+
+  function loadStore() {
     try {
-      visitedCourses = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      store = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { courses: {} };
     } catch (e) {
-      visitedCourses = [];
+      store = { courses: {} };
     }
-
-    visitedCourseSet = new Set(
-      visitedCourses
-        .filter(c => c.visited === true)
-        .map(c => c.courseId)
-    );
   }
 
-  function persistVisitedCourses() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(visitedCourses));
+  function persistStore() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   }
 
-  function markCourseVisited(courseId) {
-    if (!courseId || visitedCourseSet.has(courseId)) {
-      return;
+  function getCourse(courseId) {
+    if (!courseId) {
+      return null;
     }
 
-    visitedCourseSet.add(courseId);
-    visitedCourses.push({
-      courseId: courseId,
-      visited: true
+    if (!store.courses[courseId]) {
+      store.courses[courseId] = {
+        visited: false,
+        lessonCount: 0,
+        lessons: {}
+      };
+    }
+    return store.courses[courseId];
+  }
+
+
+  function registerCoursesFromDOM() {
+    document.querySelectorAll(".course-card").forEach(card => {
+      const courseId = card.dataset.courseId;
+      const lessonCount = parseInt(card.dataset.lessonsCount, 10);
+
+      if (!courseId || !Number.isInteger(lessonCount) || lessonCount <= 0) {
+        return;
+      }
+
+      const course = getCourse(courseId);
+      if (!course.lessonCount || lessonCount > course.lessonCount) {
+        course.lessonCount = lessonCount;
+        updateCourseVisitedState(courseId);
+      }
     });
 
-    persistVisitedCourses();
+    persistStore();
   }
 
-  function applyVisitedState() {
-    const container = document.querySelector(".course-listing");
-    if (!container) {
+  function bindLessonClicks() {
+    document.addEventListener("click", function (e) {
+      const lessonCard = e.target.closest(".lesson-card");
+      if (!lessonCard) {
+        return;
+      }
+
+      const courseId = lessonCard.dataset.courseId;
+      const lessonId = lessonCard.dataset.lessonId;
+
+      if (!courseId || !lessonId) {
+        return;
+      }
+
+      markLessonVisited(courseId, lessonId);
+      lessonCard.classList.add("is-visited");
+    });
+  }
+
+  function markLessonVisited(courseId, lessonId) {
+    const course = getCourse(courseId);
+
+    if (!course.lessons[lessonId]) {
+      course.lessons[lessonId] = { visited: true };
+    } else {
+      course.lessons[lessonId].visited = true;
+    }
+
+    updateCourseVisitedState(courseId);
+    persistStore();
+  }
+
+
+  function updateCourseVisitedState(courseId) {
+    const course = store.courses[courseId];
+    if (!course || !course.lessonCount) {
+      course.visited = false;
       return;
     }
 
-    container.querySelectorAll(".course-card").forEach(card => {
-      if (visitedCourseSet.has(card.dataset.courseId)) {
+    const visitedLessons = Object.values(course.lessons)
+      .filter(l => l.visited === true).length;
+
+    course.visited = visitedLessons === course.lessonCount;
+  }
+
+
+  function applyVisitedState() {
+    // Course cards
+    document.querySelectorAll(".course-card").forEach(card => {
+      const courseId = card.dataset.courseId;
+      if (store.courses[courseId]?.visited) {
+        card.classList.add("is-visited");
+      }
+    });
+
+    // Lesson cards
+    document.querySelectorAll(".lesson-card").forEach(card => {
+      const courseId = card.dataset.courseId;
+      const lessonId = card.dataset.lessonId;
+
+      if (store.courses[courseId]?.lessons?.[lessonId]?.visited) {
         card.classList.add("is-visited");
       }
     });
   }
 
-  function checkAndMarkCourseVisited() {
-    const component = document.querySelector(".course-selector");
-    if (!component) {
-      return;
-    }
-
-    const selectors = (component.dataset.selectors || "").split(",");
-    const courseId = selectors[0];
-
-    if (courseId) {
-      markCourseVisited(courseId);
-    }
-  }
+  /* =========================
+     INIT
+  ==========================*/
 
   function init() {
-    loadVisitedCourses();
-    checkAndMarkCourseVisited();
+    loadStore();
+    registerCoursesFromDOM();
+    bindLessonClicks();
     applyVisitedState();
   }
 

@@ -54,6 +54,9 @@ public class LessonListingModel {
     @Getter
     private List<Lesson> lessons;
 
+    @Getter
+    private String courseId;
+
     @PostConstruct
     void init() {
 
@@ -63,17 +66,36 @@ public class LessonListingModel {
             return;
         }
 
+        final String[] courseIdHolder = new String[1];
         List<String> lessonPaths = new ArrayList<>();
         Optional.ofNullable(resourceResolver.getResource(coursePath))
                 .map(res -> res.adaptTo(ContentFragment.class))
-                .filter(cf -> cf.hasElement("lessons"))
-                .map(cf -> cf.getElement("lessons").getValue().getValue(String[].class))
-                .ifPresentOrElse(
-                        lessonPathArr -> lessonPaths.addAll(List.of(lessonPathArr)),
-                        () -> {
-                            log.warn("No lessons found in course fragment: {}", coursePath);
-                            lessons = List.of();
-                        });
+                .ifPresentOrElse(courseCf -> {
+
+                    // Read courseId from course fragment
+                    this.courseId = Optional.ofNullable(courseCf.getElement("courseId"))
+                            .map(el -> el.getValue().getValue(String.class))
+                            .orElseThrow(() -> {
+                                log.warn("courseId is missing in course fragment: {}", coursePath);
+                                return new IllegalStateException("courseId is mandatory");
+                            });
+
+                    // Read lessons reference
+                    if (courseCf.hasElement("lessons")) {
+                        String[] lessonPathArr = courseCf.getElement("lessons")
+                                .getValue()
+                                .getValue(String[].class);
+
+                        if (lessonPathArr != null) {
+                            lessonPaths.addAll(List.of(lessonPathArr));
+                        }
+                    } else {
+                        log.warn("No lessons found in course fragment: {}", coursePath);
+                        lessons = List.of();
+                    }
+
+                }, () -> log.warn("Course fragment not found or not a Content Fragment: {}", coursePath));
+
 
         log.info("Collected {} lessons from Course: {}", lessonPaths.size(), coursePath);
         if (!lessonPaths.isEmpty()) {
