@@ -19,12 +19,11 @@ import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static com.aempactice.core.utils.CommonUtils.getFragmentValue;
 import static com.aempactice.core.utils.CommonUtils.getMsmLink;
@@ -34,6 +33,7 @@ import static com.aempactice.core.utils.CommonUtils.getMsmLink;
 public class CourseListingModel {
 
     public static final String RESOURCE_TYPE = "aempractice/components/courselisting";
+    private static final String COURSE_MODEL_PATH = "/conf/aempractice/settings/dam/cfm/models/course";
 
     @SlingObject
     private ResourceResolver resourceResolver;
@@ -76,22 +76,49 @@ public class CourseListingModel {
             return;
         }
 
-        courses = collectCourses(courseFolder);
+        List<Course> result = new ArrayList<>();
+        collectCoursesRecursive(courseFolder, result);
+
+        courses = result.stream()
+                .sorted(Comparator.comparing(Course::getTitle, String.CASE_INSENSITIVE_ORDER))
+                .collect(Collectors.toList());
+
         log.info("Collected {} courses from folder: {}", courses.size(), courseFolderPath);
     }
 
-    /**
-     * Collects courses from Content Fragments under the given folder
-     */
-    private List<Course> collectCourses(Resource courseFolder) {
 
-        return StreamSupport.stream(courseFolder.getChildren().spliterator(), false)
-                .map(child -> child.adaptTo(ContentFragment.class))
-                .filter(Objects::nonNull)
-                .map(this::buildCourse)
-                .flatMap(Optional::stream)
-                .sorted(Comparator.comparing(Course::getTitle, String.CASE_INSENSITIVE_ORDER))
-                .collect(Collectors.toList());
+    private void collectCoursesRecursive(Resource resource, List<Course> courses) {
+
+        if (resource == null) {
+            return;
+        }
+
+        ContentFragment fragment = resource.adaptTo(ContentFragment.class);
+        if (fragment != null && isCourseFragment(fragment)) {
+            buildCourse(fragment).ifPresent(courses::add);
+        } else if(resource.hasChildren()) {
+            for (Resource child : resource.getChildren()) {
+                collectCoursesRecursive(child, courses);
+            }
+        }
+
+
+    }
+
+    private boolean isCourseFragment(ContentFragment fragment) {
+
+        Resource fragmentResource = fragment.adaptTo(Resource.class);
+        if (fragmentResource == null) {
+            return false;
+        }
+
+        Resource dataResource = fragmentResource.getChild("jcr:content/data");
+        if (dataResource == null) {
+            return false;
+        }
+
+        String modelPath = dataResource.getValueMap().get("cq:model", String.class);
+        return StringUtils.equals(modelPath, COURSE_MODEL_PATH);
     }
 
     /**

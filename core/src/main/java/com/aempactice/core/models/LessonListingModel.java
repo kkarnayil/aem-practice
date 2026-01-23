@@ -65,8 +65,7 @@ public class LessonListingModel {
             lessons = List.of();
             return;
         }
-
-        final String[] courseIdHolder = new String[1];
+        
         List<String> lessonPaths = new ArrayList<>();
         Optional.ofNullable(resourceResolver.getResource(coursePath))
                 .map(res -> res.adaptTo(ContentFragment.class))
