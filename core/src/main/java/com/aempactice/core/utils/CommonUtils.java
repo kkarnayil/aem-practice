@@ -5,11 +5,13 @@ import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.msm.api.LiveRelationship;
 import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.resource.ResourceResolver;
 
 import javax.jcr.RangeIterator;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -23,13 +25,23 @@ public class CommonUtils {
      */
     public static String getFragmentValue(ContentFragment fragment, String elementName) {
 
-        if (fragment == null || !fragment.hasElement(elementName)) {
+        if (!fragment.hasElement(elementName)) {
             return StringUtils.EMPTY;
         }
 
-        return Optional.ofNullable(fragment.getElement(elementName).getValue())
-                .map(v -> v.getValue(String.class))
+        return Optional.ofNullable(fragment.getElement(elementName).getContent()).orElse(StringUtils.EMPTY);
+    }
+
+
+    public static List<String> getFragmentValueList(ContentFragment fragment, String elementName) {
+        if (!fragment.hasElement(elementName)) {
+            return List.of();
+        }
+
+        String arrStringValue = Optional.ofNullable(fragment.getElement(elementName).getContent())
                 .orElse(StringUtils.EMPTY);
+
+        return List.of(arrStringValue.split("\n"));
     }
 
     public static String getMsmLink(String target, ResourceResolver resourceResolver, LiveRelationshipManager liveRelationshipManager, Page currentPage) {
@@ -51,7 +63,7 @@ public class CommonUtils {
             String[] parts = target.split("#");
             targetPath = parts[0];
             log.debug("Path after split: {}", targetPath);
-            if(parts.length > 1) {
+            if (parts.length > 1) {
                 anchor = parts[1];
                 log.debug("anchor: {}", anchor);
             }
@@ -67,8 +79,8 @@ public class CommonUtils {
             if (iterator.hasNext()) {
                 LiveRelationship relationship = (LiveRelationship) iterator.next();
                 courseMsmLink = relationship.getTargetPath();
-                if(anchor != null) {
-                    courseMsmLink += "#"+anchor;
+                if (anchor != null) {
+                    courseMsmLink += "#" + anchor;
                 }
             }
         } catch (Exception e) {

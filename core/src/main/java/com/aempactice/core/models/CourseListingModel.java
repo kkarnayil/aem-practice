@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.aempactice.core.utils.CommonUtils.getFragmentValue;
+import static com.aempactice.core.utils.CommonUtils.getFragmentValueList;
 import static com.aempactice.core.utils.CommonUtils.getMsmLink;
 
 @Slf4j
@@ -37,10 +38,6 @@ public class CourseListingModel {
 
     @SlingObject
     private ResourceResolver resourceResolver;
-
-    @Getter
-    @ValueMapValue
-    private String heading;
 
     @Getter
     @ValueMapValue
@@ -63,8 +60,8 @@ public class CourseListingModel {
     @PostConstruct
     void init() {
 
-        if (resourceResolver == null || StringUtils.isBlank(courseFolderPath)) {
-            log.warn("ResourceResolver or courseFolderPath is missing");
+        if (StringUtils.isBlank(courseFolderPath)) {
+            log.warn("courseFolderPath is missing");
             courses = List.of();
             return;
         }
@@ -108,10 +105,6 @@ public class CourseListingModel {
     private boolean isCourseFragment(ContentFragment fragment) {
 
         Resource fragmentResource = fragment.adaptTo(Resource.class);
-        if (fragmentResource == null) {
-            return false;
-        }
-
         Resource dataResource = fragmentResource.getChild("jcr:content/data");
         if (dataResource == null) {
             return false;
@@ -130,7 +123,7 @@ public class CourseListingModel {
         String title = getFragmentValue(courseFragment, "courseTitle");
         String path = getMsmLink(getFragmentValue(courseFragment, "courseLink"), resourceResolver, liveRelationshipManager, currentPage);
         String thumbnail = getFragmentValue(courseFragment, "courseThumbnail");
-        int lessonsCount = getLessonCount(courseFragment);
+        int lessonsCount = getFragmentValueList(courseFragment, "lessons").size();
 
         if (StringUtils.isAnyBlank(id, path, title)) {
             log.warn("Invalid course fragment: {}", courseFragment.getTitle());
@@ -144,15 +137,5 @@ public class CourseListingModel {
                 .thumbnail(thumbnail)
                 .lessonsCount(lessonsCount)
                 .build());
-    }
-
-    private int getLessonCount(ContentFragment courseFragment) {
-        int lessonsCount = 0;
-        if (courseFragment.hasElement("lessons")) {
-            lessonsCount = Optional.ofNullable(courseFragment.getElement("lessons").getValue().getValue(String[].class))
-                    .map(lessonsArr -> lessonsArr.length)
-                    .orElse(0);
-        }
-        return lessonsCount;
     }
 }

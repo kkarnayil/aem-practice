@@ -1,0 +1,145 @@
+{
+  "dam": {
+    "jcr:primaryType": "sling:Folder",
+    "courses": {
+      "jcr:primaryType": "sling:Folder",
+      "course-1": {
+        "jcr:primaryType": "sling:Folder",
+        "course-1": {
+          "jcr:primaryType": "dam:Asset",
+          "jcr:content": {
+            "jcr:primaryType": "dam:AssetContent",
+            "metadata": {
+              "jcr:primaryType": "nt:unstructured"
+            },
+            "data": {
+              "cq:model": "/conf/aempractice/settings/dam/cfm/models/course",
+              "master": {
+                "courseId": "course-1",
+                "courseTitle": "Introduction to AEM",
+                "courseLink": "/content/mccom/languagemasters/en/courses/course-1",
+                "lessons": [
+                  "/content/dam/courses/course-1/lesson-1",
+                  "/content/dam/courses/course-1/lesson-2-without-id"
+                ]
+              }
+            }
+          }
+        },
+        "lesson-1": {
+          "jcr:primaryType": "dam:Asset",
+          "jcr:content": {
+            "jcr:primaryType": "dam:AssetContent",
+            "metadata": {
+              "jcr:primaryType": "nt:unstructured"
+            },
+            "data": {
+              "cq:model": "/conf/aempractice/settings/dam/cfm/models/lesson",
+              "master": {
+                "lessonId": "lesson-1",
+                "lessonTitle": "Introduction to Lesson 1",
+                "lessonLink": "/content/mccom/languagemasters/en/courses/course-1/lessons/lesson-1"
+              }
+            }
+          }
+        },
+        "lesson-2-without-id": {
+          "jcr:primaryType": "dam:Asset",
+          "jcr:content": {
+            "jcr:primaryType": "dam:AssetContent",
+            "metadata": {
+              "jcr:primaryType": "nt:unstructured"
+            },
+            "data": {
+              "cq:model": "/conf/aempractice/settings/dam/cfm/models/lesson",
+              "master": {
+                "lessonTitle": "Introduction to Lesson 2",
+                "lessonLink": "/content/mccom/languagemasters/en/courses/course-1/lessons/lesson-2"
+              }
+            }
+          }
+        }
+      },
+      "course-2-no-link": {
+        "jcr:primaryType": "sling:Folder",
+        "course-2": {
+          "jcr:primaryType": "dam:Asset",
+          "jcr:content": {
+            "jcr:primaryType": "dam:AssetContent",
+            "metadata": {
+              "jcr:primaryType": "nt:unstructured"
+            },
+            "data": {
+              "cq:model": "/conf/aempractice/settings/dam/cfm/models/course",
+              "master": {
+                "courseId": "course-1",
+                "courseTitle": "Introduction to AEM"
+              }
+            }
+          }
+        }
+      },
+      "course-3-no-data-node": {
+        "jcr:primaryType": "sling:Folder",
+        "course-3": {
+          "jcr:primaryType": "dam:Asset",
+          "jcr:content": {
+            "jcr:primaryType": "dam:AssetContent",
+            "metadata": {
+              "jcr:primaryType": "nt:unstructured"
+            }
+          }
+        }
+      }
+    }
+  },
+  "mccom": {
+    "language-masters": {
+      "jcr:primaryType": "cq:Page",
+      "en": {
+        "jcr:primaryType": "cq:Page",
+        "courses": {
+          "jcr:primaryType": "cq:Page",
+          "sling:resourceType": "aempractice/components/page",
+          "jcr:content": {
+            "jcr:primaryType": "cq:PageContent",
+            "root": {
+              "course-listing": {
+                "sling:resourceType": "aempractice/components/courselisting",
+                "courseFolderPath": "/content/dam/courses"
+              },
+              "course-listing-unconfigured": {
+                "sling:resourceType": "aempractice/components/courselisting"
+              },
+              "course-listing-wrong-path": {
+                "sling:resourceType": "aempractice/components/courselisting",
+                "courseFolderPath": "/content/dam/invalidfolder"
+              }
+            }
+          }
+        },
+        "lessons": {
+          "jcr:primaryType": "cq:Page",
+          "sling:resourceType": "aempractice/components/page",
+          "jcr:content": {
+            "jcr:primaryType": "cq:PageContent",
+            "root": {
+              "lesson-listing": {
+                "sling:resourceType": "aempractice/components/lessonlisting",
+                "coursePath": "/content/dam/courses/course-1/course-1"
+              },
+              "lesson-listing-unconfigured": {
+                "sling:resourceType": "aempractice/components/lessonlisting"
+              },
+              "lesson-listing-wrong-path": {
+                "sling:resourceType": "aempractice/components/lessonlisting",
+                "courseAssetPath": "/content/dam/courses/invalid-course/invalid-course"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
