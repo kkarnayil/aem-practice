@@ -1,9 +1,8 @@
 package com.aempactice.core.models;
 
-import com.adobe.cq.dam.cfm.ContentFragment;
-import com.aempactice.core.beans.Lesson;
+import com.aempactice.core.services.CourseService;
+import com.aempactice.core.services.MsmLinkResolver;
 import com.day.cq.wcm.api.Page;
-import com.day.cq.wcm.msm.api.LiveRelationshipManager;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -18,15 +17,10 @@ import org.apache.sling.models.annotations.injectorspecific.SlingObject;
 import org.apache.sling.models.annotations.injectorspecific.ValueMapValue;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.aempactice.core.utils.CommonUtils.getFragmentValue;
-import static com.aempactice.core.utils.CommonUtils.getFragmentValueList;
 
 @Slf4j
 @Model(adaptables = SlingHttpServletRequest.class, resourceType = LessonListingModel.RESOURCE_TYPE, defaultInjectionStrategy = DefaultInjectionStrategy.OPTIONAL)
@@ -37,6 +31,12 @@ public class LessonListingModel {
     @SlingObject
     private ResourceResolver resourceResolver;
 
+    @OSGiService
+    private CourseService courseService;
+
+    @OSGiService
+    private MsmLinkResolver msmLinkResolver;
+
     @Getter
     @ValueMapValue
     private String coursePath;
@@ -45,9 +45,6 @@ public class LessonListingModel {
     @Default(values = "Read Article")
     @ValueMapValue
     private String viewLessonLinkLabel;
-
-    @OSGiService
-    private LiveRelationshipManager liveRelationshipManager;
 
     @ScriptVariable
     private Page currentPage;
@@ -61,57 +58,53 @@ public class LessonListingModel {
     @PostConstruct
     void init() {
 
-        if (StringUtils.isBlank(coursePath)) {
-            log.warn("coursePath is missing");
+        if (resourceResolver == null || StringUtils.isBlank(coursePath)) {
+            log.warn("ResourceResolver or coursePath is missing");
             lessons = List.of();
             return;
         }
 
-        List<String> lessonPaths = new ArrayList<>();
-        Optional.ofNullable(resourceResolver.getResource(coursePath))
-                .map(res -> res.adaptTo(ContentFragment.class))
-                .ifPresentOrElse(courseCf -> {
-                    // Read courseId from course fragment
-                    this.courseId = getFragmentValue(courseCf, "courseId");
-                    lessonPaths.addAll(getFragmentValueList(courseCf, "lessons"));
-                }, () -> log.warn("Course fragment not found or not a Content Fragment: {}", coursePath));
+        Course course = courseService.getCourse(coursePath, resourceResolver);
 
-        log.info("Collected {} lessons from Course: {}", lessonPaths.size(), coursePath);
-        if (!lessonPaths.isEmpty()) {
-            collectLessons(lessonPaths);
+        if (course == null) {
+            log.warn("No Course found at path: {}", coursePath);
+            this.lessons = List.of();
+            return;
         }
-    }
 
-    private void collectLessons(List<String> lessonPaths) {
-        lessons = lessonPaths.stream()
-                .map(path -> resourceResolver.getResource(path))
-                .filter(Objects::nonNull)
-                .map(res -> res.adaptTo(ContentFragment.class))
-                .filter(Objects::nonNull)
-                .map(this::buildLesson)
-                .flatMap(Optional::stream)
+        this.courseId = course.getId();
+        List<Lesson> courseLessons = courseService.getLessons(coursePath, resourceResolver);
+
+        if (courseLessons == null || courseLessons.isEmpty()) {
+            log.warn("No lessons found for Course at path: {}", coursePath);
+            this.lessons = List.of();
+            return;
+        }
+
+        this.lessons = courseLessons.stream()
+                .map(this::enrichLessonWithMsmLink)
                 .sorted(Comparator.comparing(Lesson::getTitle, String.CASE_INSENSITIVE_ORDER))
                 .collect(Collectors.toList());
+
+
+        log.info("Collected {} lessons from Course: {}", lessons.size(), coursePath);
     }
 
-    private Optional<Lesson> buildLesson(ContentFragment lessonFragment) {
+    /**
+     * Enriches a Lesson with its MSM link based on the current page context.
+     *
+     * @param lesson the Lesson to enrich
+     * @return the enriched Lesson
+     */
+    private Lesson enrichLessonWithMsmLink(Lesson lesson) {
+        String msmLink = msmLinkResolver.resolve(
+                lesson.getPath(), currentPage, resourceResolver);
 
-        String id = getFragmentValue(lessonFragment, "lessonId");
-        String title = getFragmentValue(lessonFragment, "lessonTitle");
-        String path = getFragmentValue(lessonFragment, "lessonLink");
-        String thumbnail = getFragmentValue(lessonFragment, "lessonThumbnail");
-
-        if (StringUtils.isAnyBlank(id, title, path)) {
-            log.warn("Invalid lesson fragment at {} (missing mandatory fields)",
-                    lessonFragment.getName());
-            return Optional.empty();
-        }
-
-        return Optional.of(Lesson.builder()
-                .id(id)
-                .title(title)
-                .path(path)
-                .thumbnail(thumbnail)
-                .build());
+        return Lesson.builder()
+                .id(lesson.getId())
+                .title(lesson.getTitle())
+                .path(msmLink != null ? msmLink : lesson.getPath())
+                .thumbnail(lesson.getThumbnail())
+                .build();
     }
 }

@@ -1,10 +1,10 @@
 <div class="course-listing" 
-    data-sly-use.model="com.aempactice.core.models.CourseListingModel" 
+    data-sly-use.model="com.aempactice.core.models.CourseListingModelImpl" 
     data-sly-use.placeholderTemplate="core/wcm/components/commons/v1/templates.html"
     data-sly-set.isEmpty="${!model.courseFolderPath || model.courses.size == 0}">
   
     <div class="course-grid" data-sly-test="${!isEmpty}" data-sly-list.course="${model.courses}">
-        <a class="course-card" data-course-id="${course.id}" data-lessons-count="${course.lessonsCount}" href="${course.path @ extension='html'}">
+        <a class="course-card" data-course-id="${course.id}" data-lessons-count="${course.lessonCount}" href="${course.path @ extension='html'}">
             <img src="${course.thumbnail}" alt="" class="course-icon" />
             <div class="course-content">
                 <h3>${course.title}</h3>

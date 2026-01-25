@@ -1,4 +1,4 @@
-package com.aempactice.core.beans;
+package com.aempactice.core.models;
 
 import lombok.Builder;
 import lombok.Getter;

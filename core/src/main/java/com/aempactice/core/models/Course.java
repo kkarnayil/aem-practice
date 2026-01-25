@@ -1,4 +1,6 @@
-package com.aempactice.core.beans;
+package com.aempactice.core.models;
+
+import java.util.List;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -12,5 +14,6 @@ public class Course {
     private String title;
     private String path;
     private String thumbnail;
-    private int lessonsCount;
+    private int lessonCount;
+    private List<Lesson> lessons;
 }
