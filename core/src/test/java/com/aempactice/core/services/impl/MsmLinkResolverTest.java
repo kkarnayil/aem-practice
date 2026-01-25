@@ -1,8 +1,5 @@
 package com.aempactice.core.services.impl;
 
-import com.aempactice.core.models.LessonListingModel;
-import com.aempactice.core.services.CourseService;
-import com.aempactice.core.services.MsmLinkResolver;
 import com.day.cq.wcm.api.Page;
 import com.day.cq.wcm.api.WCMException;
 import com.day.cq.wcm.msm.api.LiveRelationship;
@@ -55,12 +52,27 @@ public class MsmLinkResolverTest {
     }
 
     @Test
+    void testResolveInvalidResourse() {
+        Page page = context.currentPage("/content/mccom/us/en/courses");
+        String targetPage = msmLinkResolver.resolve("/content/mccom/us/en/courses/course-invalid", page, context.resourceResolver());
+        assertEquals("/content/mccom/us/en/courses/course-invalid", targetPage);
+    }
+
+    @Test
     void testResolveNull() {
         String targetPage = msmLinkResolver.resolve(null, null, null);
         assertNull(targetPage);
 
         targetPage = msmLinkResolver.resolve("#", null, null);
         assertEquals("#", targetPage);
+    }
+
+    @Test
+    void testResolveUsPageException() throws WCMException {
+        Page page = context.currentPage("/content/mccom/us/en/courses");
+        when(liveRelationshipManager.getLiveRelationships(any(Resource.class), anyString(), any())).thenThrow(new WCMException("Test Exception"));
+        String targetPage = msmLinkResolver.resolve("/content/mccom/us/en/courses/course-1", page, context.resourceResolver());
+        assertEquals("/content/mccom/us/en/courses/course-1", targetPage);
     }
 
     @Test
