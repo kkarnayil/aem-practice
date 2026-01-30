@@ -19,13 +19,6 @@ public interface CourseService {
     Course getCourse(String coursePath, ResourceResolver resolver);
 
     /**
-     * Checks if a Content Fragment is of type Course.
-     * @param contentFragment the content fragment to check
-     * @return true if it is a course fragment, false otherwise
-     */
-    boolean isCourseFragment(ContentFragment contentFragment);
-
-    /**
      * Reads all lessons from a course fragment.
      */
     List<Lesson> getLessons(String coursePath, ResourceResolver resolver);

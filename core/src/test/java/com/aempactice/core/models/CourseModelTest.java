@@ -1,6 +1,5 @@
 package com.aempactice.core.models;
 
-import com.adobe.cq.dam.cfm.ContentFragment;
 import com.aempactice.core.services.CourseService;
 import com.aempactice.core.services.MsmLinkResolver;
 import com.day.cq.wcm.api.Page;
@@ -19,14 +18,15 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({AemContextExtension.class, MockitoExtension.class})
-public class CourseListingModelTest {
+public class CourseModelTest {
 
-    private CourseListingModelImpl courseListingModel;
+    private CourseModelImpl courseModel;
 
     @Mock
     private CourseService courseService;
@@ -40,37 +40,14 @@ public class CourseListingModelTest {
     public void setUp() {
         context.registerService(CourseService.class, courseService);
         context.registerService(MsmLinkResolver.class, msmLinkResolver);
-        context.addModelsForClasses(CourseListingModelImpl.class);
+        context.addModelsForClasses(CourseModelImpl.class);
         context.load().json("/json/course-lessons-journey.json", "/content");
     }
 
     @Test
-    void testCourseListingUnconfigured() {
-        context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing-unconfigured");
-        courseListingModel = context.request().adaptTo(CourseListingModelImpl.class);
-        assertNotNull(courseListingModel);
-        assertEquals(0, courseListingModel.getCourses().size());
-    }
+    void testCourseModelValid() {
 
-    @Test
-    void testCourseListingInvalidPath() {
-        context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing-wrong-path");
-        courseListingModel = context.request().adaptTo(CourseListingModelImpl.class);
-        assertNotNull(courseListingModel);
-        assertEquals(0, courseListingModel.getCourses().size());
-    }
-
-    @Test
-    void testCourseListingEmptyFolder() {
-        context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing-empty-folder");
-        courseListingModel = context.request().adaptTo(CourseListingModelImpl.class);
-        assertNotNull(courseListingModel);
-        assertEquals(0, courseListingModel.getCourses().size());
-    }
-
-    @Test
-    void testCoursesSuccess() {
-        context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing");
+        context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course");
         Lesson mockLesson = Lesson.builder()
                 .id("lesson-1")
                 .title("Test Lesson")
@@ -87,39 +64,37 @@ public class CourseListingModelTest {
                 .lessonCount(1)
                 .build();
 
-        when(courseService.isCourseFragment(any(ContentFragment.class))).thenReturn(true);
         when(courseService.getCourse(anyString(), any(ResourceResolver.class))).thenReturn(mockCourse);
         when(msmLinkResolver.resolve(anyString(), any(Page.class), any(ResourceResolver.class))).thenReturn("/msm/link/course-1");
 
-        courseListingModel = context.request().adaptTo(CourseListingModelImpl.class);
-        assertNotNull(courseListingModel);
-        Course course = courseListingModel.getCourses().get(0);
+        courseModel = context.request().adaptTo(CourseModelImpl.class);
+        assertNotNull(courseModel);
+        Course course = courseModel.getCourse();
         assertAll(
                 () -> assertEquals("course-1", course.getId()),
                 () -> assertEquals("Test Title", course.getTitle()),
                 () -> assertEquals("test.png", course.getThumbnail()),
                 () -> assertEquals(1, course.getLessonCount()),
                 () -> assertEquals("/msm/link/course-1", course.getPath()),
-                () -> assertEquals("View Course", courseListingModel.getViewCourseLinkLabel())
+                () -> assertEquals("View Course", courseModel.getViewCourseLinkLabel())
         );
-    }
 
-    @Test
-    void testCFNotCourse() {
-        context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing");
-        when(courseService.isCourseFragment(any(ContentFragment.class))).thenReturn(false);
-        courseListingModel = context.request().adaptTo(CourseListingModelImpl.class);
-        assertNotNull(courseListingModel);
-        assertEquals(0, courseListingModel.getCourses().size());
     }
 
     @Test
     void testServiceCourseNull() {
-        context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing");
-        when(courseService.isCourseFragment(any(ContentFragment.class))).thenReturn(true);
+        context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course");
         when(courseService.getCourse(anyString(), any(ResourceResolver.class))).thenReturn(null);
-        courseListingModel = context.request().adaptTo(CourseListingModelImpl.class);
-        assertNotNull(courseListingModel);
-        assertEquals(0, courseListingModel.getCourses().size());
+        courseModel = context.request().adaptTo(CourseModelImpl.class);
+        assertNotNull(courseModel);
+        assertNull(courseModel.getCourse());
+    }
+
+    @Test
+    void testServiceCourseUnConfigured() {
+        context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-unconfigured");
+        courseModel = context.request().adaptTo(CourseModelImpl.class);
+        assertNotNull(courseModel);
+        assertNull(courseModel.getCourse());
     }
 }

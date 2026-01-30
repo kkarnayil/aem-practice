@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jcr:root xmlns:jcr="http://www.jcp.org/jcr/1.0" xmlns:nt="http://www.jcp.org/jcr/nt/1.0" xmlns:cq="http://www.day.com/jcr/cq/1.0" xmlns:sling="http://sling.apache.org/jcr/sling/1.0"
     jcr:primaryType="nt:unstructured"
-    jcr:title="Content Fragment Card"
+    jcr:title="Course"
     sling:resourceType="cq/gui/components/authoring/dialog">
     <content
         jcr:primaryType="nt:unstructured"
@@ -18,16 +18,11 @@
                         sling:resourceType="granite/ui/components/coral/foundation/container"
                         margin="{Boolean}true">
                         <items jcr:primaryType="nt:unstructured">
-                            <title
+                            <coursePath
                                 jcr:primaryType="nt:unstructured"
-                                sling:resourceType="granite/ui/components/coral/foundation/form/textfield"
-                                fieldLabel="Title"
-                                name="./title"/>
-                            <folderPath
-                                jcr:primaryType="nt:unstructured"
-                                sling:resourceType="granite/ui/components/coral/foundation/form/pathbrowser"
-                                fieldLabel="Source Folder"
-                                name="./courseFolderPath"
+                                sling:resourceType="dam/cfm/components/cfpicker"
+                                fieldLabel="Course link"
+                                name="./coursePath"
                                 rootPath="/content/dam"/>
                              <linkTitle
                                 jcr:primaryType="nt:unstructured"

@@ -1,27 +1,21 @@
 package com.aempactice.core.services.impl;
 
-import com.adobe.cq.dam.cfm.ContentFragment;
 import com.aempactice.core.models.Course;
 import com.aempactice.core.models.Lesson;
 import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextBuilder;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import org.apache.sling.api.resource.Resource;
-import org.apache.sling.api.resource.ValueMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 
 @ExtendWith({AemContextExtension.class, MockitoExtension.class})
 public class CourseServiceImplTest {
@@ -38,25 +32,25 @@ public class CourseServiceImplTest {
 
     @Test
     void getCourseEmptyCoursePath() {
-        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing-unconfigured");
+        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-unconfigured");
         assertNull(courseService.getCourse(null, resource.getResourceResolver()));
     }
 
     @Test
     void getCourseNullResolver() {
-        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing-unconfigured");
+        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-unconfigured");
         assertNull(courseService.getCourse(null, null));
     }
 
     @Test
     void getCoursePathNotResource() {
-        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing-unconfigured");
+        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-unconfigured");
         assertNull(courseService.getCourse("/content/mccom/language-masters/en/courses/non-existent", resource.getResourceResolver()));
     }
 
     @Test
     void getCoursePathNotContentFragment() {
-        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing-unconfigured");
+        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-unconfigured");
         assertNull(courseService.getCourse(resource.getPath(), resource.getResourceResolver()));
     }
 
@@ -95,41 +89,8 @@ public class CourseServiceImplTest {
     }
 
     @Test
-    void isCourseFragmentNullFragment() {
-        assertFalse(courseService.isCourseFragment(null));
-    }
-
-    @Test
-    void isCourseFragmentNotResource() {
-        ContentFragment mockFragment = Mockito.mock(ContentFragment.class);
-        when(mockFragment.adaptTo(Resource.class)).thenReturn(null);
-        assertFalse(courseService.isCourseFragment(mockFragment));
-    }
-
-    @Test
-    void isCourseFragmentNoDataChild() {
-        ContentFragment mockFragment = Mockito.mock(ContentFragment.class);
-        Resource mockResource = Mockito.mock(Resource.class);
-        when(mockFragment.adaptTo(Resource.class)).thenReturn(mockResource);
-        when(mockResource.getChild("jcr:content/data")).thenReturn(null);
-        assertFalse(courseService.isCourseFragment(mockFragment));
-    }
-
-    @Test
-    void isCourseFragmentTrue() {
-        ContentFragment mockFragment = Mockito.mock(ContentFragment.class);
-        ValueMap valueMap = Mockito.mock(ValueMap.class);
-        Resource mockResource = Mockito.mock(Resource.class);
-        when(mockFragment.adaptTo(Resource.class)).thenReturn(mockResource);
-        when(mockResource.getChild("jcr:content/data")).thenReturn(mockResource);
-        when(mockResource.getValueMap()).thenReturn(valueMap);
-        when(valueMap.get("cq:model", String.class)).thenReturn(CourseServiceImpl.COURSE_MODEL_PATH);
-        assertTrue(courseService.isCourseFragment(mockFragment));
-    }
-
-    @Test
     void getLessonEmptyCoursePath() {
-        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing-unconfigured");
+        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-unconfigured");
         assertEquals(0, courseService.getLessons(null, resource.getResourceResolver()).size());
     }
 
@@ -140,13 +101,13 @@ public class CourseServiceImplTest {
 
     @Test
     void getLessonPathNotResource() {
-        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing-unconfigured");
+        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-unconfigured");
         assertEquals(0, courseService.getLessons("/content/mccom/language-masters/en/courses/non-existent", resource.getResourceResolver()).size());
     }
 
     @Test
     void getLessonPathNotContentFragment() {
-        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing-unconfigured");
+        Resource resource = context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-unconfigured");
         assertEquals(0, courseService.getLessons(resource.getPath(), resource.getResourceResolver()).size());
     }
 

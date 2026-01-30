@@ -144,20 +144,16 @@
           "jcr:content": {
             "jcr:primaryType": "cq:PageContent",
             "root": {
-              "course-listing": {
+              "course": {
                 "sling:resourceType": "aempractice/components/courselisting",
-                "courseFolderPath": "/content/dam/courses"
+                "coursePath": "/content/dam/courses/course-1/course-1"
               },
-              "course-listing-unconfigured": {
+              "course-unconfigured": {
                 "sling:resourceType": "aempractice/components/courselisting"
               },
-              "course-listing-wrong-path": {
+              "course-wrong-path": {
                 "sling:resourceType": "aempractice/components/courselisting",
-                "courseFolderPath": "/content/dam/invalidfolder"
-              },
-              "course-listing-empty-folder": {
-                "sling:resourceType": "aempractice/components/courselisting",
-                "courseFolderPath": "/content/dam/course-empty-folder"
+                "coursePath": "/content/dam/invalidfolder"
               }
             }
           },

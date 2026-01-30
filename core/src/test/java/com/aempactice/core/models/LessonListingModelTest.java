@@ -55,7 +55,7 @@ public class LessonListingModelTest {
 
     @Test
     void testCourseListingInvalidPath() {
-        context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-listing-wrong-path");
+        context.currentResource("/content/mccom/language-masters/en/courses/jcr:content/root/course-wrong-path");
         lessonListingModel = context.request().adaptTo(LessonListingModel.class);
         assertNotNull(lessonListingModel);
         assertEquals(0, lessonListingModel.getLessons().size());
