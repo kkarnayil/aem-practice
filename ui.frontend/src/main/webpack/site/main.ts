@@ -1,5 +1,6 @@
 import './main.scss';
-import '../components/courselisting.js';
+
+import '../components/course-tracker/bootstrap.js';
 
 import RequireContext = __WebpackModuleApi.RequireContext;
 
