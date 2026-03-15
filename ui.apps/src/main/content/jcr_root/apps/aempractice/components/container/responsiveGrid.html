@@ -1,0 +1,10 @@
+<template data-sly-template.responsiveGrid="${ @ container}">
+    <div data-sly-element="${properties.htmlElement || 'div'}"
+    	 id="${container.id}"
+         class="cmp-container"
+         aria-label="${container.accessibilityLabel}"
+         role="${container.roleAttribute}"
+         style="${container.backgroundStyle @ context='styleString'}">
+        <sly data-sly-resource="${resource @ resourceType='wcm/foundation/components/responsivegrid'}"></sly>
+    </div>
+</template>
